@@ -2,35 +2,35 @@
 #define DSSTRING_H
 
 #include <iostream>
-#include <cstddef> // For size_t
-
+#include <cstddef> 
+// Class representing a dynamic string
 class DSString
 {
 private:
-    char *data;
-    size_t len;
+    char *data; 
+    size_t len; 
 
 public:
-    DSString();
-    DSString(const char *);
-    DSString(const DSString &);
-    DSString &operator=(const DSString &);
-    ~DSString();
+    DSString(); 
+    DSString(const char *); // Constructor from a C-string
+    DSString(const DSString &); // Copy constructor
+    DSString &operator=(const DSString &); // Copy assignment operator
+    ~DSString(); // Destructor
 
-    size_t length() const;
-    char &operator[](size_t);
-    const char &operator[](size_t) const; // Added const version
+    size_t length() const; // Returns the length of the string
+    char &operator[](size_t); // Mutable access to character at index
+    const char &operator[](size_t) const; // Consant access to character at index
 
-    DSString operator+(const DSString &) const;
-    bool operator==(const DSString &) const;
-    bool operator<(const DSString &) const;
+    DSString operator+(const DSString &) const; 
+    bool operator==(const DSString &) const; // Equality comparison
+    bool operator<(const DSString &) const; 
 
-    DSString substring(size_t start, size_t numChars) const;
-    DSString toLower() const;
+    DSString substring(size_t start, size_t numChars) const; // Returns a substring
+    DSString toLower() const; // Converts characters to lowercase
 
-    const char *c_str() const;
+    const char *c_str() const; // Returns C-string representation
 
-    friend std::ostream &operator<<(std::ostream &, const DSString &);
+    friend std::ostream &operator<<(std::ostream &, const DSString &); // Output stream operator
 };
 
 // Specialization of std::hash for DSString
