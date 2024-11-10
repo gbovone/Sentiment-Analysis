@@ -14,7 +14,7 @@ std::unordered_set<std::string> stopWords = {
     "of", "on", "that", "the", "to", "was", "were", "will", "with"
 };
 
-// Tokenizer function remains the same
+// Tokenizer function
 std::vector<DSString> tokenize(const DSString& tweet) {
     std::vector<DSString> words;
     size_t start = 0;
@@ -26,7 +26,7 @@ std::vector<DSString> tokenize(const DSString& tweet) {
             ++start;
         }
 
-        // Find the end of the word
+        // funtion to find end of word
         size_t end = start;
         while (end < len && std::isalnum(tweet[end])) {
             ++end;
@@ -45,7 +45,7 @@ std::vector<DSString> tokenize(const DSString& tweet) {
     return words;
 }
 
-// Custom CSV parsing function
+// function to read training files
 std::vector<std::string> parseCSVLine(const std::string& line) {
     std::vector<std::string> fields;
     std::string field;
@@ -65,7 +65,7 @@ std::vector<std::string> parseCSVLine(const std::string& line) {
     }
     fields.push_back(field);
 
-    // Remove surrounding quotes from fields
+    // get rid of quotes
     for (auto& f : fields) {
         if (f.length() >= 2 && f.front() == '"' && f.back() == '"') {
             f = f.substr(1, f.length() - 2);
@@ -80,20 +80,20 @@ void SentimentClassifier::train(const char* trainingDataFile) {
 
     std::ifstream infile(trainingDataFile);
     if (!infile.is_open()) {
-        std::cerr << "Error opening training data file." << std::endl;
+        std::cerr << "Error opening training data file." << std::endl; //error handling
         return;
     }
 
     std::string line;
     int lineNumber = 0;
 
-    // Skip header line if present
+    
     if (!infile.eof()) {
         std::getline(infile, line);
         if (line.find("Sentiment") != std::string::npos) {
-            // Header detected, skip this line
+            
         } else {
-            // Reset to the beginning if no header
+            
             infile.clear();
             infile.seekg(0, std::ios::beg);
         }
@@ -104,7 +104,7 @@ void SentimentClassifier::train(const char* trainingDataFile) {
 
         std::vector<std::string> fields = parseCSVLine(line);
 
-        // Ensure we have at least 6 fields
+        //detect malformed lines the code cannot read properly
         if (fields.size() < 6) {
             std::cerr << "Malformed line at " << lineNumber << ": " << line << std::endl;
             continue; // Skip this line
@@ -119,10 +119,10 @@ void SentimentClassifier::train(const char* trainingDataFile) {
             int sentiment = std::stoi(sentimentStr);
             DSString tweetText(textStr.c_str());
 
-            // Tokenize tweet
+          
             std::vector<DSString> words = tokenize(tweetText);
 
-            // Update word counts
+            // how many words for positive and negative sentiments
             if (sentiment == 4) {
                 totalPositiveTweets++;
                 for (const auto& word : words) {
@@ -134,7 +134,7 @@ void SentimentClassifier::train(const char* trainingDataFile) {
                     negativeWordCounts[word]++;
                 }
             }
-            // Ignore tweets with other sentiment values
+            // ignore neither positive or negative sentiments
         } catch (const std::invalid_argument& e) {
             std::cerr << "Invalid sentiment value at line " << lineNumber << ": '" << sentimentStr << "' in line: " << line << std::endl;
             continue; // Skip this line
@@ -142,12 +142,12 @@ void SentimentClassifier::train(const char* trainingDataFile) {
     }
 
     infile.close();
-
+ // training time
     auto end = std::chrono::steady_clock::now();  // End timer
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "Training time: " << elapsed_seconds.count() << "s\n";
 }
-
+//check the data gained from testing and output collected
 void SentimentClassifier::predict(const char* testingDataFile, const char* outputFile) {
     auto start = std::chrono::steady_clock::now();  // Start timer
 
@@ -161,18 +161,18 @@ void SentimentClassifier::predict(const char* testingDataFile, const char* outpu
     std::string line;
     int lineNumber = 0;
 
-    // Skip header line if present
+    
     if (!infile.eof()) {
         std::getline(infile, line);
 
-        // Convert line to lowercase for case-insensitive comparison
+        // change strings to lowercase
         std::string lowerLine = line;
         std::transform(lowerLine.begin(), lowerLine.end(), lowerLine.begin(), ::tolower);
 
         if (lowerLine.find("id") != std::string::npos && lowerLine.find("tweet") != std::string::npos) {
             // Header detected, skip this line
         } else {
-            // Reset to the beginning if no header
+            
             infile.clear();
             infile.seekg(0, std::ios::beg);
         }
@@ -183,7 +183,7 @@ void SentimentClassifier::predict(const char* testingDataFile, const char* outpu
 
         std::vector<std::string> fields = parseCSVLine(line);
 
-        // Ensure we have at least 5 fields (testing data doesn't have sentiment)
+        
         if (fields.size() < 5) {
             std::cerr << "Malformed line at " << lineNumber << ": " << line << std::endl;
             continue; // Skip this line
@@ -199,7 +199,7 @@ void SentimentClassifier::predict(const char* testingDataFile, const char* outpu
             // Tokenize tweet
             std::vector<DSString> words = tokenize(tweetText);
 
-            // Predict sentiment
+        
             int positiveScore = 0;
             int negativeScore = 0;
 
@@ -210,7 +210,7 @@ void SentimentClassifier::predict(const char* testingDataFile, const char* outpu
 
             int predictedSentiment = (positiveScore >= negativeScore) ? 4 : 0;
 
-            // Write prediction to output file
+            // add sentiment predictions to output
             outfile << predictedSentiment << ", " << tweetID << "\n";
         } catch (const std::invalid_argument& e) {
             std::cerr << "Invalid ID value at line " << lineNumber << ": '" << idStr << "' in line: " << line << std::endl;
@@ -243,7 +243,7 @@ void SentimentClassifier::evaluatePredictions(const char* predictionsFile, const
     int correct = 0;
     std::vector<std::string> errors;
 
-    // Skip header lines if present
+    
     auto skipHeader = [](std::ifstream& file) {
         if (!file.eof()) {
             std::streampos originalPos = file.tellg();
@@ -267,7 +267,7 @@ void SentimentClassifier::evaluatePredictions(const char* predictionsFile, const
     while (std::getline(predFile, predLine) && std::getline(truthFile, truthLine)) {
         ++total;
 
-        // Remove any trailing carriage return characters (for Windows compatibility)
+        
         if (!predLine.empty() && predLine.back() == '\r') {
             predLine.pop_back();
         }
@@ -275,13 +275,13 @@ void SentimentClassifier::evaluatePredictions(const char* predictionsFile, const
             truthLine.pop_back();
         }
 
-        // Parse prediction line
+        
         std::stringstream ssPred(predLine);
         std::string predSentimentStr, predIDStr;
         std::getline(ssPred, predSentimentStr, ',');
         std::getline(ssPred, predIDStr);
 
-        // Parse ground truth line
+        
         std::stringstream ssTruth(truthLine);
         std::string truthSentimentStr, truthIDStr;
         std::getline(ssTruth, truthSentimentStr, ',');
@@ -302,10 +302,10 @@ void SentimentClassifier::evaluatePredictions(const char* predictionsFile, const
         }
     }
 
-    // Calculate accuracy
+    // accuracy
     double accuracy = (total > 0) ? static_cast<double>(correct) / total : 0.0;
 
-    // Write accuracy and errors to file
+    // accuracy and error handling to output
     accFile << std::fixed << std::setprecision(3) << accuracy << "\n";
     for (const auto& errorLine : errors) {
         accFile << errorLine << "\n";
