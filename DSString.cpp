@@ -1,4 +1,3 @@
-
 #include "DSString.h"
 
 // Default constructor
@@ -101,7 +100,7 @@ bool DSString::operator==(const DSString &other) const {
     return true;
 }
 
-// Less than operator (lexicographical comparison)
+// Less than operator
 bool DSString::operator<(const DSString &other) const {
     size_t minLen = (len < other.len) ? len : other.len;
     for (size_t i = 0; i < minLen; ++i) {
@@ -130,7 +129,7 @@ DSString DSString::toLower() const {
     DSString lowerStr(*this);
     for (size_t i = 0; i < len; ++i) {
         if (lowerStr.data[i] >= 'A' && lowerStr.data[i] <= 'Z') {
-            lowerStr.data[i] += ('a' - 'A'); // Convert to lowercase
+            lowerStr.data[i] += ('a' - 'A');
         }
     }
     return lowerStr;
